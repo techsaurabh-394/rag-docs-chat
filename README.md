@@ -1,5 +1,7 @@
 # rag-docs-chat
 
+[![Stars](https://img.shields.io/github/stars/techsaurabh-394/rag-docs-chat?style=flat&logo=github&color=6ea8fe)](https://github.com/techsaurabh-394/rag-docs-chat/stargazers) [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat)](LICENSE) [![Last commit](https://img.shields.io/github/last-commit/techsaurabh-394/rag-docs-chat?style=flat)](https://github.com/techsaurabh-394/rag-docs-chat/commits/main) [![Issues](https://img.shields.io/github/issues/techsaurabh-394/rag-docs-chat?style=flat)](https://github.com/techsaurabh-394/rag-docs-chat/issues)
+
 Upload PDFs or text files, ask questions, and get answers that **cite the exact source passage** (document name, page and snippet). A compact, readable RAG pipeline: chunking, retrieval, grounded generation and a retrieval evaluation script.
 
 <!-- Add a screenshot after running it:  ![screenshot](docs/screenshot.png) -->
@@ -78,3 +80,12 @@ pytest
 ## License
 
 MIT, built by Saurabh Dev.
+
+## Roadmap (contributions welcome)
+- [ ] Hybrid retrieval (BM25 + dense) and a reranker
+- [ ] Streaming answers in the UI
+- [ ] Answer-faithfulness check (does each cited claim appear in its source?)
+- [ ] pgvector / Qdrant backend
+- [ ] OCR fallback for scanned PDFs
+
+If this is useful, a star helps others find it.
