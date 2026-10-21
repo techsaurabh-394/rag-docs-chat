@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rag-docs-chat</title>
+<style>
+  :root { --bg:#0f1115; --card:#181b22; --line:#2a2f3a; --text:#e6e8ee; --muted:#8b93a7; --accent:#6ea8fe; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { margin:0 0 4px; font-size: 26px; }
+  .sub { color: var(--muted); margin-bottom: 24px; }
+  .card { background: var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:16px; }
+  button { background: var(--accent); color:#0b1220; border:0; border-radius:8px; padding:9px 16px; font-weight:600; cursor:pointer; }
+  button.ghost { background:transparent; color:var(--muted); border:1px solid var(--line); padding:4px 10px; font-weight:500; }
+  button:disabled { opacity:.5; cursor:wait; }
+  input[type=text] { width:100%; background:#0f1115; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:11px 12px; font-size:15px; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .doc { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--line); }
+  .doc:last-child { border:0; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .answer { white-space: pre-wrap; }
+  .src { border-left:3px solid var(--accent); padding:6px 12px; margin-top:10px; background:#12151b; border-radius:0 8px 8px 0; }
+  .src b { color: var(--accent); }
+  .badge { font-size:12px; border:1px solid var(--line); border-radius:99px; padding:2px 8px; color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>rag-docs-chat</h1>
+  <div class="sub">Upload PDFs or text files, then ask questions. Answers cite the source passage.</div>
+
+  <div class="card">
+    <div class="row">
+      <input id="file" type="file" accept=".pdf,.txt,.md">
+      <button id="upload">Upload</button>
+      <span id="upmsg" class="muted"></span>
+    </div>
+    <div id="docs" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <input id="q" type="text" placeholder="Ask a question about your documents..." style="flex:1">
+      <button id="ask">Ask</button>
+    </div>
+  </div>
+
+  <div id="result"></div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => s.replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function loadDocs() {
+  const r = await fetch('/api/docs'); const d = await r.json();
+  $('docs').innerHTML = d.documents.length
+    ? d.documents.map(x => `<div class="doc"><span>${esc(x.name)} <span class="muted">· ${x.chunks} chunks</span></span><button class="ghost" data-name="${esc(x.name)}">Remove</button></div>`).join('')
+    : '<div class="muted">No documents yet.</div>';
+  document.querySelectorAll('#docs button').forEach(b => b.onclick = async () => {
+    await fetch('/api/docs/' + encodeURIComponent(b.dataset.name), { method: 'DELETE' }); loadDocs();
+  });
+}
+
+$('upload').onclick = async () => {
+  const f = $('file').files[0]; if (!f) return;
+  $('upload').disabled = true; $('upmsg').textContent = 'Indexing...';
+  const fd = new FormData(); fd.append('file', f);
+  const r = await fetch('/api/upload', { method: 'POST', body: fd });
+  const d = await r.json();
+  $('upmsg').textContent = r.ok ? `Indexed ${d.chunks} chunks from ${d.pages} page(s).` : (d.detail || 'Upload failed');
+  $('upload').disabled = false; loadDocs();
+};
+
+async function ask() {
+  const question = $('q').value.trim(); if (question.length < 3) return;
+  $('ask').disabled = true; $('result').innerHTML = '<div class="card muted">Thinking...</div>';
+  const r = await fetch('/api/ask', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ question }) });
+  const d = await r.json();
+  if (!r.ok) { $('result').innerHTML = `<div class="card">${esc(JSON.stringify(d.detail || d))}</div>`; $('ask').disabled = false; return; }
+  $('result').innerHTML = `<div class="card"><div class="row" style="justify-content:space-between"><b>Answer</b><span class="badge">${d.mode}</span></div>
+    <div class="answer" style="margin-top:8px">${esc(d.answer)}</div></div>` +
+    (d.sources.length ? `<div class="card"><b>Sources</b>` + d.sources.map(s =>
+      `<div class="src"><b>[${s.n}]</b> ${esc(s.doc)} · p.${s.page} <span class="muted">· score ${s.score}</span><div class="muted" style="margin-top:4px">${esc(s.text.slice(0, 320))}${s.text.length > 320 ? '…' : ''}</div></div>`).join('') + `</div>` : '');
+  $('ask').disabled = false;
+}
+$('ask').onclick = ask;
+$('q').addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
+loadDocs();
+</script>
+</body>
+</html>

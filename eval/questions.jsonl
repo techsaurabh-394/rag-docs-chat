@@ -1,0 +1,10 @@
+{"question": "Why are multi-stage builds useful for production images?", "doc": "docker_basics.txt", "contains": "small runtime image"}
+{"question": "What makes rebuilding a Dockerfile faster?", "doc": "docker_basics.txt", "contains": "Layers are cached"}
+{"question": "How do containers get isolated from each other?", "doc": "docker_basics.txt", "contains": "namespaces"}
+{"question": "Which header value forbids storing a response entirely?", "doc": "http_caching.txt", "contains": "no-store"}
+{"question": "What status code does the server return when an ETag matches?", "doc": "http_caching.txt", "contains": "304"}
+{"question": "How long can fingerprinted static assets be cached?", "doc": "http_caching.txt", "contains": "for a year"}
+{"question": "What directive sets a lifetime only for a CDN?", "doc": "http_caching.txt", "contains": "s-maxage"}
+{"question": "Where should refresh tokens be stored?", "doc": "jwt_auth.txt", "contains": "httpOnly cookie"}
+{"question": "How can you revoke a JWT before it expires?", "doc": "jwt_auth.txt", "contains": "denylist"}
+{"question": "Is the JWT payload encrypted?", "doc": "jwt_auth.txt", "contains": "not encrypted"}

@@ -1,0 +1,9 @@
+JWT Authentication
+
+A JSON Web Token has three parts separated by dots: a header, a payload and a signature. The header names the signing algorithm, the payload carries claims such as the subject and expiry time, and the signature proves the token was not altered. The payload is only encoded, not encrypted, so secrets must never be stored in it.
+
+Access tokens should be short lived, commonly fifteen minutes. A longer lived refresh token is used to obtain new access tokens. Refresh tokens should be stored in an httpOnly cookie so JavaScript cannot read them, and they should be rotated on every use to detect theft.
+
+Role-based access control assigns permissions to roles and roles to users. The server checks the role claim on every protected route instead of trusting the client interface. Always verify the signature and the exp claim, and reject tokens that use the none algorithm.
+
+Revoking a stateless token before it expires requires a server-side denylist or a token version number stored with the user record.

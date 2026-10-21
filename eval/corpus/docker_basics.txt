@@ -1,0 +1,9 @@
+Docker Basics
+
+A Docker image is a read-only template made of layers. Each instruction in a Dockerfile, such as RUN or COPY, creates a new layer. Layers are cached, so putting rarely changing instructions first makes rebuilds faster.
+
+A container is a running instance of an image. Containers are isolated from each other through Linux namespaces, and their resource usage is limited with control groups. Stopping a container does not delete its filesystem changes until the container is removed.
+
+Multi-stage builds let you compile an application in one stage and copy only the final artifact into a small runtime image. This keeps production images small and reduces the attack surface because build tools are not shipped.
+
+Docker Compose describes several services in one YAML file. A single command starts the application, its database and a cache together, and named volumes keep database files between restarts.

@@ -1,0 +1,9 @@
+HTTP Caching
+
+The Cache-Control header tells browsers and proxies how long a response may be reused. The max-age directive sets the freshness lifetime in seconds. The no-store directive forbids storing the response at all, which is used for sensitive data. The no-cache directive allows storing but requires revalidation with the server before each reuse.
+
+An ETag is an opaque identifier for a specific version of a resource. A client sends it back in the If-None-Match header. If the resource has not changed, the server replies with status 304 Not Modified and no body, saving bandwidth.
+
+Fingerprinted static assets, such as app.3f9a1c.js, can be cached for a year with the immutable directive because their file name changes whenever the content changes. HTML documents are usually served with short lifetimes so users receive new asset references quickly.
+
+A CDN keeps copies of responses at edge locations close to users. The s-maxage directive sets a lifetime that applies only to shared caches like a CDN, separate from the browser lifetime.
