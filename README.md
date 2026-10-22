@@ -1,6 +1,6 @@
 # rag-docs-chat
 
-[![Stars](https://img.shields.io/github/stars/techsaurabh-394/rag-docs-chat?style=flat&logo=github&color=6ea8fe)](https://github.com/techsaurabh-394/rag-docs-chat/stargazers) [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat)](LICENSE) [![Last commit](https://img.shields.io/github/last-commit/techsaurabh-394/rag-docs-chat?style=flat)](https://github.com/techsaurabh-394/rag-docs-chat/commits/main) [![Issues](https://img.shields.io/github/issues/techsaurabh-394/rag-docs-chat?style=flat)](https://github.com/techsaurabh-394/rag-docs-chat/issues)
+[![Stars](https://img.shields.io/github/stars/techsaurabh-394/rag-docs-chat?style=flat&logo=github&color=6ea8fe)](https://github.com/techsaurabh-394/rag-docs-chat/stargazers) [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat)](LICENSE) [![Last commit](https://img.shields.io/github/last-commit/techsaurabh-394/rag-docs-chat?style=flat)](https://github.com/techsaurabh-394/rag-docs-chat/commits/main) [![Issues](https://img.shields.io/github/issues/techsaurabh-394/rag-docs-chat?style=flat)](https://github.com/techsaurabh-394/rag-docs-chat/issues) [![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=flat&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/saurabhdev)
 
 Upload PDFs or text files, ask questions, and get answers that **cite the exact source passage** (document name, page and snippet). A compact, readable RAG pipeline: chunking, retrieval, grounded generation and a retrieval evaluation script.
 
@@ -79,7 +79,7 @@ pytest
 
 ## License
 
-MIT, built by Saurabh Dev.
+MIT, built by Saurabh Pathak.
 
 ## Roadmap (contributions welcome)
 - [ ] Hybrid retrieval (BM25 + dense) and a reranker
@@ -89,3 +89,18 @@ MIT, built by Saurabh Dev.
 - [ ] OCR fallback for scanned PDFs
 
 If this is useful, a star helps others find it.
+
+## Support this project
+If this is useful, a star helps others find it, and you can support more free open-source work:
+
+<a href="https://buymeacoffee.com/saurabhdev"><img src="https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"/></a>
+
+---
+
+<p align="center">
+  <b>Saurabh Pathak</b> · AI Engineer &amp; Full-Stack Developer<br/>
+  <a href="https://github.com/techsaurabh-394">GitHub</a> ·
+  <a href="https://www.linkedin.com/in/tech-saurabh/">LinkedIn</a> ·
+  <a href="https://mernstackdev.com">Blog</a> ·
+  <a href="mailto:saurabhpathak394@gmail.com">saurabhpathak394@gmail.com</a>
+</p>
