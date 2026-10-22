@@ -8,3 +8,11 @@
 {"question": "Where should refresh tokens be stored?", "doc": "jwt_auth.txt", "contains": "httpOnly cookie"}
 {"question": "How can you revoke a JWT before it expires?", "doc": "jwt_auth.txt", "contains": "denylist"}
 {"question": "Is the JWT payload encrypted?", "doc": "jwt_auth.txt", "contains": "not encrypted"}
+{"question": "Why does shipping a compiler inside the final container make it riskier?", "doc": "docker_basics.txt", "contains": "attack surface"}
+{"question": "How do I keep my database data around when the stack is restarted?", "doc": "docker_basics.txt", "contains": "named volumes"}
+{"question": "What is the way to make the browser check back with the origin before showing a saved copy?", "doc": "http_caching.txt", "contains": "no-cache"}
+{"question": "How does a client ask whether its stored copy is still current?", "doc": "http_caching.txt", "contains": "If-None-Match"}
+{"question": "Why should webpage markup get a brief freshness window?", "doc": "http_caching.txt", "contains": "short lifetimes"}
+{"question": "How can a thief be detected if they steal a long-lived credential?", "doc": "jwt_auth.txt", "contains": "rotated on every use"}
+{"question": "Which signing setting must a server never accept from incoming tokens?", "doc": "jwt_auth.txt", "contains": "none algorithm"}
+{"question": "Can I put passwords inside the middle section of the token?", "doc": "jwt_auth.txt", "contains": "secrets must never be stored"}

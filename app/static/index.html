@@ -24,6 +24,9 @@
   .src { border-left:3px solid var(--accent); padding:6px 12px; margin-top:10px; background:#12151b; border-radius:0 8px 8px 0; }
   .src b { color: var(--accent); }
   .badge { font-size:12px; border:1px solid var(--line); border-radius:99px; padding:2px 8px; color:var(--muted); }
+  .badge.ok { color:#6fd39a; border-color:#2f6b4a; }
+  .badge.warn { color:#f0b35a; border-color:#7a5a24; }
+  .unsup { background:#2a2114; border-left:3px solid #f0b35a; padding:4px 10px; margin-top:6px; border-radius:0 6px 6px 0; font-size:13px; }
 </style>
 </head>
 <body>
@@ -44,6 +47,9 @@
     <div class="row">
       <input id="q" type="text" placeholder="Ask a question about your documents..." style="flex:1">
       <button id="ask">Ask</button>
+      <select id="mode" title="Retrieval mode" style="background:#0f1115;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px">
+        <option value="">default</option><option>hybrid</option><option>bm25</option><option>local</option>
+      </select>
     </div>
   </div>
 
@@ -76,11 +82,17 @@ $('upload').onclick = async () => {
 async function ask() {
   const question = $('q').value.trim(); if (question.length < 3) return;
   $('ask').disabled = true; $('result').innerHTML = '<div class="card muted">Thinking...</div>';
-  const r = await fetch('/api/ask', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ question }) });
+  const payload = { question }; if ($('mode').value) payload.mode = $('mode').value;
+  const r = await fetch('/api/ask', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
   const d = await r.json();
   if (!r.ok) { $('result').innerHTML = `<div class="card">${esc(JSON.stringify(d.detail || d))}</div>`; $('ask').disabled = false; return; }
-  $('result').innerHTML = `<div class="card"><div class="row" style="justify-content:space-between"><b>Answer</b><span class="badge">${d.mode}</span></div>
-    <div class="answer" style="margin-top:8px">${esc(d.answer)}</div></div>` +
+  const f = d.faithfulness || {}; const bad = (f.sentences || []).filter(s => !s.supported);
+  const fbadge = (f.sentences || []).length
+    ? `<span class="badge ${bad.length ? 'warn' : 'ok'}" title="Cheap lexical heuristic, not an LLM judge">${bad.length ? '⚠ ' + bad.length + ' unsupported' : '✓ supported'} · ${Math.round(f.score * 100)}%</span>` : '';
+  const warn = bad.length ? `<div class="muted" style="margin-top:10px">Sentences with weak word overlap with their cited sources (heuristic, may be false alarms):</div>` +
+    bad.map(s => `<div class="unsup">${esc(s.text)} <span class="muted">· support ${Math.round(s.support * 100)}%</span></div>`).join('') : '';
+  $('result').innerHTML = `<div class="card"><div class="row" style="justify-content:space-between"><b>Answer</b><span class="row" style="gap:6px">${fbadge}<span class="badge">${d.mode}</span></span></div>
+    <div class="answer" style="margin-top:8px">${esc(d.answer)}</div>${warn}</div>` +
     (d.sources.length ? `<div class="card"><b>Sources</b>` + d.sources.map(s =>
       `<div class="src"><b>[${s.n}]</b> ${esc(s.doc)} · p.${s.page} <span class="muted">· score ${s.score}</span><div class="muted" style="margin-top:4px">${esc(s.text.slice(0, 320))}${s.text.length > 320 ? '…' : ''}</div></div>`).join('') + `</div>` : '');
   $('ask').disabled = false;

@@ -9,7 +9,19 @@ from pathlib import Path
 import numpy as np
 
 from .chunking import Chunk, chunk_pages
+from .bm25 import BM25, rrf
 from .embeddings import Embedder, get_embedder
+from .faithfulness import check_faithfulness
+
+MODES = ("local", "bm25", "hybrid")
+RRF_K = 60
+
+
+def default_mode() -> str:
+    mode = os.getenv("RETRIEVAL", "hybrid").lower()
+    if mode not in MODES:
+        raise ValueError(f"Unknown RETRIEVAL '{mode}' (use one of {', '.join(MODES)})")
+    return mode
 
 SYSTEM_PROMPT = (
     "You answer questions using ONLY the numbered sources provided. "
@@ -25,6 +37,7 @@ class Index:
         self.embedder = embedder or get_embedder()
         self.chunks: list[Chunk] = []
         self.matrix = np.zeros((0, 0), dtype=np.float32)
+        self.bm25 = BM25([])
         if self.path and self.path.exists():
             self._load()
 
@@ -56,14 +69,36 @@ class Index:
         texts = [c.text for c in self.chunks]
         self.embedder.fit(texts)
         self.matrix = self.embedder.embed_docs(texts)
+        self.bm25 = BM25(texts)
 
     # ---- searching ------------------------------------------------
-    def search(self, query: str, k: int = 4) -> list[tuple[float, Chunk]]:
+    def _vector_scores(self, query: str) -> np.ndarray:
+        return self.matrix @ self.embedder.embed_query(query)
+
+    def search(self, query: str, k: int = 4, mode: str | None = None) -> list[tuple[float, Chunk]]:
+        """Top-k (score, chunk). mode: local (vectors), bm25 (keywords) or hybrid (RRF of both).
+
+        Scores are comparable only within one mode: cosine for local, BM25 for bm25,
+        fused RRF score for hybrid.
+        """
         if not self.chunks:
             return []
-        q = self.embedder.embed_query(query)
-        scores = self.matrix @ q
-        order = np.argsort(-scores)[:k]
+        mode = (mode or default_mode()).lower()
+        if mode not in MODES:
+            raise ValueError(f"Unknown mode '{mode}' (use one of {', '.join(MODES)})")
+
+        if mode == "local":
+            scores = self._vector_scores(query)
+        elif mode == "bm25":
+            scores = np.asarray(self.bm25.scores(query))
+        else:
+            vec = self._vector_scores(query)
+            bm = np.asarray(self.bm25.scores(query))
+            vr = [int(i) for i in np.argsort(-vec, kind="stable") if vec[i] > 0]
+            br = [int(i) for i in np.argsort(-bm, kind="stable") if bm[i] > 0]
+            fused = rrf([vr, br], k=RRF_K)[:k]
+            return [(s, self.chunks[i]) for i, s in fused]
+        order = np.argsort(-scores, kind="stable")[:k]
         return [(float(scores[i]), self.chunks[i]) for i in order if scores[i] > 0]
 
     # ---- persistence ----------------------------------------------
@@ -86,13 +121,20 @@ def build_context(hits: list[tuple[float, Chunk]]) -> str:
 
 
 def answer(question: str, hits: list[tuple[float, Chunk]]) -> dict:
-    """Return {answer, mode, sources}. Uses Claude if ANTHROPIC_API_KEY is set, else extractive."""
+    """Return {answer, mode, sources, faithfulness}. Uses Claude if ANTHROPIC_API_KEY is set, else extractive."""
     sources = [
         {"n": i, "doc": c.doc, "page": c.page, "score": round(s, 3), "text": c.text}
         for i, (s, c) in enumerate(hits, start=1)
     ]
     if not hits:
-        return {"answer": "I could not find anything relevant in the uploaded documents.", "mode": "none", "sources": []}
+        return {
+            "answer": "I could not find anything relevant in the uploaded documents.",
+            "mode": "none",
+            "sources": [],
+            "faithfulness": check_faithfulness("", []),
+        }
+
+    chunk_texts = [c.text for _, c in hits]
 
     if os.getenv("ANTHROPIC_API_KEY"):
         try:
@@ -106,12 +148,19 @@ def answer(question: str, hits: list[tuple[float, Chunk]]) -> dict:
                 messages=[{"role": "user", "content": f"Sources:\n\n{build_context(hits)}\n\nQuestion: {question}"}],
             )
             text = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
-            return {"answer": text.strip(), "mode": "llm", "sources": sources}
+            text = text.strip()
+            return {"answer": text, "mode": "llm", "sources": sources, "faithfulness": check_faithfulness(text, chunk_texts)}
         except Exception as e:  # network/key/model problems: degrade gracefully
             note = f"(LLM unavailable: {type(e).__name__}. Showing top passages instead.)\n\n"
-            return {"answer": note + _extractive(hits), "mode": "extractive", "sources": sources}
+            return _extractive_result(note, hits, sources)
 
-    return {"answer": _extractive(hits), "mode": "extractive", "sources": sources}
+    return _extractive_result("", hits, sources)
+
+
+def _extractive_result(note: str, hits: list[tuple[float, Chunk]], sources: list[dict]) -> dict:
+    # Extractive answers quote the best chunk verbatim; check only the quoted passage, not the header line.
+    faith = check_faithfulness(hits[0][1].text + " [1]", [c.text for _, c in hits])
+    return {"answer": note + _extractive(hits), "mode": "extractive", "sources": sources, "faithfulness": faith}
 
 
 def _extractive(hits: list[tuple[float, Chunk]]) -> str:

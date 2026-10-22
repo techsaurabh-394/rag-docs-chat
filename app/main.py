@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from pypdf import PdfReader
 
-from .rag import Index, answer
+from .rag import MODES, Index, answer
 
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024
 STATIC = Path(__file__).parent / "static"
@@ -22,6 +22,7 @@ index = Index(path=os.getenv("INDEX_PATH", "data/index.json"))
 class Ask(BaseModel):
     question: str = Field(min_length=3, max_length=1000)
     k: int = Field(default=4, ge=1, le=10)
+    mode: str | None = Field(default=None, description="local | bm25 | hybrid (default: RETRIEVAL env, else hybrid)")
 
 
 def _extract_pages(filename: str, data: bytes) -> list[str]:
@@ -69,5 +70,7 @@ def delete_doc(name: str):
 
 @app.post("/api/ask")
 def ask(body: Ask):
-    hits = index.search(body.question, k=body.k)
+    if body.mode is not None and body.mode.lower() not in MODES:
+        raise HTTPException(422, f"mode must be one of {', '.join(MODES)}")
+    hits = index.search(body.question, k=body.k, mode=body.mode)
     return answer(body.question, hits)
