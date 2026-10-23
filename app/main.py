@@ -48,6 +48,18 @@ def list_docs():
     return {"documents": index.documents()}
 
 
+@app.get("/api/health")
+def health():
+    """Used by the UI status badges and by deploy health checks."""
+    return {
+        "status": "ok",
+        "llm": bool(os.getenv("ANTHROPIC_API_KEY")),
+        "retrieval": os.getenv("RETRIEVAL", "hybrid"),
+        "embedder": os.getenv("EMBEDDER", "local"),
+        "documents": len(index.documents()),
+    }
+
+
 @app.post("/api/upload")
 async def upload(file: UploadFile = File(...)):
     name = Path(file.filename or "upload").name  # strip any path components

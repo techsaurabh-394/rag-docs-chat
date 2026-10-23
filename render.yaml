@@ -1,0 +1,17 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# autoDeploy is off on purpose: the GitHub Action (deploy.yml) triggers a deploy
+# only after the tests pass.
+services:
+  - type: web
+    name: rag-docs-chat
+    runtime: docker
+    plan: free
+    autoDeployTrigger: off
+    healthCheckPath: /api/health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false          # set it in the Render dashboard (optional)
+      - key: RETRIEVAL
+        value: hybrid
+      - key: INDEX_PATH
+        value: /app/data/index.json

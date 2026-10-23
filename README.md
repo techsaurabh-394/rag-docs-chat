@@ -75,6 +75,16 @@ docker build -t rag-docs-chat .
 docker run -p 8000:8000 -e ANTHROPIC_API_KEY=your_key rag-docs-chat
 ```
 
+## Deploy (GitHub Actions + Render)
+Every push to `main` runs CI. When CI passes, `.github/workflows/deploy.yml` builds the Docker image, publishes it to `ghcr.io/techsaurabh-394/rag-docs-chat`, and triggers a Render deploy.
+
+1. On Render: **New > Blueprint**, pick this repo. It reads `render.yaml` (Docker, free plan, health check `/api/health`). Optionally set `ANTHROPIC_API_KEY` in the Render dashboard.
+2. In Render, open the service > **Settings > Deploy Hook** and copy the URL.
+3. In GitHub: **Settings > Secrets and variables > Actions**. Add secret `RENDER_DEPLOY_HOOK` (the hook URL) and variable `APP_URL` (for example `https://rag-docs-chat.onrender.com`).
+4. Push to `main`, or run **Actions > Deploy > Run workflow**.
+
+Without `RENDER_DEPLOY_HOOK` the workflow still publishes the image and skips the deploy step. On the free plan the disk is ephemeral, so uploaded documents are lost on restart. Add a persistent disk or a vector database for real use.
+
 ## Configuration
 | Variable | Default | Meaning |
 |---|---|---|

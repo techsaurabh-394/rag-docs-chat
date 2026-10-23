@@ -4,102 +4,208 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>rag-docs-chat</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 rx=%273%27 fill=%27%236ea8fe%27/%3E%3C/svg%3E">
 <style>
-  :root { --bg:#0f1115; --card:#181b22; --line:#2a2f3a; --text:#e6e8ee; --muted:#8b93a7; --accent:#6ea8fe; }
+  :root { --bg:#0f1115; --card:#181b22; --line:#2a2f3a; --text:#e6e8ee; --muted:#8b93a7; --accent:#6ea8fe; --ok:#6fd39a; --warn:#f0b35a; --bad:#f07a7a; }
   * { box-sizing: border-box; }
+  html, body { height:100%; }
   body { margin:0; background:var(--bg); color:var(--text); font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
-  main { max-width: 900px; margin: 0 auto; padding: 32px 20px 64px; }
-  h1 { margin:0 0 4px; font-size: 26px; }
-  .sub { color: var(--muted); margin-bottom: 24px; }
-  .card { background: var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:16px; }
-  button { background: var(--accent); color:#0b1220; border:0; border-radius:8px; padding:9px 16px; font-weight:600; cursor:pointer; }
-  button.ghost { background:transparent; color:var(--muted); border:1px solid var(--line); padding:4px 10px; font-weight:500; }
-  button:disabled { opacity:.5; cursor:wait; }
-  input[type=text] { width:100%; background:#0f1115; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:11px 12px; font-size:15px; }
-  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-  .doc { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--line); }
+  .app { display:grid; grid-template-columns: 320px 1fr; height:100vh; }
+  aside { border-right:1px solid var(--line); padding:20px; overflow:auto; background:#12151b; }
+  section.chat { display:flex; flex-direction:column; min-width:0; }
+  h1 { margin:0 0 2px; font-size:22px; }
+  .sub { color:var(--muted); font-size:13px; margin-bottom:18px; }
+  .muted { color:var(--muted); font-size:13px; }
+  button { background:var(--accent); color:#0b1220; border:0; border-radius:8px; padding:9px 16px; font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  button.ghost { background:transparent; color:var(--muted); border:1px solid var(--line); padding:3px 9px; font-weight:500; font-size:12px; }
+  button.ghost:hover { color:var(--bad); border-color:var(--bad); }
+  select, input[type=text] { background:#0f1115; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:15px; }
+  #drop { border:2px dashed var(--line); border-radius:12px; padding:22px 12px; text-align:center; cursor:pointer; color:var(--muted); transition:.15s; }
+  #drop.over, #drop:hover { border-color:var(--accent); color:var(--text); background:#151a24; }
+  #drop b { color:var(--accent); }
+  .doc { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--line); }
   .doc:last-child { border:0; }
-  .muted { color: var(--muted); font-size: 13px; }
-  .answer { white-space: pre-wrap; }
-  .src { border-left:3px solid var(--accent); padding:6px 12px; margin-top:10px; background:#12151b; border-radius:0 8px 8px 0; }
-  .src b { color: var(--accent); }
-  .badge { font-size:12px; border:1px solid var(--line); border-radius:99px; padding:2px 8px; color:var(--muted); }
-  .badge.ok { color:#6fd39a; border-color:#2f6b4a; }
-  .badge.warn { color:#f0b35a; border-color:#7a5a24; }
-  .unsup { background:#2a2114; border-left:3px solid #f0b35a; padding:4px 10px; margin-top:6px; border-radius:0 6px 6px 0; font-size:13px; }
+  .doc .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .up { margin-top:8px; font-size:13px; }
+  .up.ok { color:var(--ok); } .up.err { color:var(--bad); }
+  .bar { height:4px; background:var(--line); border-radius:4px; overflow:hidden; margin-top:4px; }
+  .bar > i { display:block; height:100%; width:0; background:var(--accent); transition:width .2s; }
+  .status { display:flex; gap:6px; flex-wrap:wrap; margin:14px 0; }
+  .badge { font-size:12px; border:1px solid var(--line); border-radius:99px; padding:2px 8px; color:var(--muted); white-space:nowrap; }
+  .badge.ok { color:var(--ok); border-color:#2f6b4a; } .badge.warn { color:var(--warn); border-color:#7a5a24; }
+  #thread { flex:1; overflow:auto; padding:24px 28px; }
+  .empty { max-width:560px; margin:12vh auto 0; text-align:center; color:var(--muted); }
+  .chips { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:14px; }
+  .chip { border:1px solid var(--line); border-radius:99px; padding:6px 12px; cursor:pointer; color:var(--text); font-size:13px; background:var(--card); }
+  .chip:hover { border-color:var(--accent); }
+  .msg { max-width:820px; margin:0 auto 18px; }
+  .msg.user { text-align:right; }
+  .msg.user .bubble { display:inline-block; text-align:left; background:#22304a; border-radius:14px 14px 4px 14px; padding:9px 14px; max-width:85%; }
+  .msg.bot .bubble { background:var(--card); border:1px solid var(--line); border-radius:14px 14px 14px 4px; padding:14px 16px; }
+  .answer { white-space:pre-wrap; }
+  .cite { color:var(--accent); cursor:pointer; font-weight:600; }
+  .meta { display:flex; gap:6px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+  details { margin-top:10px; }
+  summary { cursor:pointer; color:var(--muted); font-size:13px; }
+  .src { border-left:3px solid var(--accent); padding:6px 12px; margin-top:8px; background:#12151b; border-radius:0 8px 8px 0; }
+  .src.hl { background:#1c2638; }
+  .src b { color:var(--accent); }
+  .unsup { background:#2a2114; border-left:3px solid var(--warn); padding:4px 10px; margin-top:6px; border-radius:0 6px 6px 0; font-size:13px; }
+  .composer { border-top:1px solid var(--line); padding:14px 28px; display:flex; gap:10px; background:#12151b; }
+  .composer input { flex:1; }
+  .dots::after { content:''; animation:d 1.2s steps(4) infinite; }
+  @keyframes d { 0%{content:''} 25%{content:'.'} 50%{content:'..'} 75%{content:'...'} }
+  @media (max-width: 820px) { .app { grid-template-columns:1fr; height:auto; } aside { border-right:0; border-bottom:1px solid var(--line); } #thread { min-height:50vh; } }
 </style>
 </head>
 <body>
-<main>
-  <h1>rag-docs-chat</h1>
-  <div class="sub">Upload PDFs or text files, then ask questions. Answers cite the source passage.</div>
+<div class="app">
+  <aside>
+    <h1>rag-docs-chat</h1>
+    <div class="sub">Upload documents, then ask. Every answer cites its source.</div>
 
-  <div class="card">
-    <div class="row">
-      <input id="file" type="file" accept=".pdf,.txt,.md">
-      <button id="upload">Upload</button>
-      <span id="upmsg" class="muted"></span>
-    </div>
-    <div id="docs" style="margin-top:12px"></div>
-  </div>
+    <div id="drop" tabindex="0"><b>Drop files here</b> or click to browse<br><span class="muted">PDF, TXT, MD · 20 MB max each</span></div>
+    <input id="file" type="file" accept=".pdf,.txt,.md" multiple hidden>
+    <div id="uploads"></div>
 
-  <div class="card">
-    <div class="row">
-      <input id="q" type="text" placeholder="Ask a question about your documents..." style="flex:1">
-      <button id="ask">Ask</button>
-      <select id="mode" title="Retrieval mode" style="background:#0f1115;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px">
-        <option value="">default</option><option>hybrid</option><option>bm25</option><option>local</option>
+    <div class="status" id="status"></div>
+
+    <div class="muted" style="margin:6px 0">Documents</div>
+    <div id="docs"></div>
+
+    <div class="muted" style="margin:18px 0 6px">Settings</div>
+    <div style="display:flex;gap:8px">
+      <select id="mode" title="Retrieval mode" style="flex:1">
+        <option value="">mode: default</option><option>hybrid</option><option>bm25</option><option>local</option>
+      </select>
+      <select id="k" title="Passages to retrieve">
+        <option>3</option><option selected>4</option><option>6</option><option>8</option>
       </select>
     </div>
-  </div>
+    <div style="margin-top:14px"><button class="ghost" id="clear" style="color:var(--muted)">Clear chat</button></div>
+  </aside>
 
-  <div id="result"></div>
-</main>
+  <section class="chat">
+    <div id="thread"></div>
+    <form class="composer" id="form">
+      <input id="q" type="text" placeholder="Ask a question about your documents..." autocomplete="off">
+      <button id="ask" type="submit">Ask</button>
+    </form>
+  </section>
+</div>
+
 <script>
 const $ = (id) => document.getElementById(id);
-const esc = (s) => s.replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let docs = [], health = {}, turn = 0;
+
+async function loadHealth() {
+  try { health = await (await fetch('/api/health')).json(); } catch { health = {}; }
+  $('status').innerHTML =
+    `<span class="badge ${health.llm ? 'ok' : 'warn'}" title="${health.llm ? 'Claude writes the answer' : 'No API key: returns the best passage'}">${health.llm ? 'Claude answers' : 'extractive mode'}</span>` +
+    `<span class="badge">${esc(health.retrieval || 'hybrid')}</span><span class="badge">${esc(health.embedder || 'local')} embeddings</span>`;
+}
 
 async function loadDocs() {
-  const r = await fetch('/api/docs'); const d = await r.json();
-  $('docs').innerHTML = d.documents.length
-    ? d.documents.map(x => `<div class="doc"><span>${esc(x.name)} <span class="muted">· ${x.chunks} chunks</span></span><button class="ghost" data-name="${esc(x.name)}">Remove</button></div>`).join('')
+  docs = (await (await fetch('/api/docs')).json()).documents;
+  $('docs').innerHTML = docs.length
+    ? docs.map(x => `<div class="doc"><span class="nm" title="${esc(x.name)}">${esc(x.name)} <span class="muted">· ${x.chunks}</span></span><button class="ghost" data-name="${esc(x.name)}">Remove</button></div>`).join('')
     : '<div class="muted">No documents yet.</div>';
   document.querySelectorAll('#docs button').forEach(b => b.onclick = async () => {
     await fetch('/api/docs/' + encodeURIComponent(b.dataset.name), { method: 'DELETE' }); loadDocs();
   });
+  renderEmpty();
 }
 
-$('upload').onclick = async () => {
-  const f = $('file').files[0]; if (!f) return;
-  $('upload').disabled = true; $('upmsg').textContent = 'Indexing...';
-  const fd = new FormData(); fd.append('file', f);
-  const r = await fetch('/api/upload', { method: 'POST', body: fd });
-  const d = await r.json();
-  $('upmsg').textContent = r.ok ? `Indexed ${d.chunks} chunks from ${d.pages} page(s).` : (d.detail || 'Upload failed');
-  $('upload').disabled = false; loadDocs();
-};
+function renderEmpty() {
+  if ($('thread').querySelector('.msg')) return;
+  $('thread').innerHTML = docs.length
+    ? `<div class="empty"><h2 style="color:var(--text);margin:0 0 6px">Ask anything about your documents</h2>Answers cite the exact passage and are checked for support.</div>`
+    : `<div class="empty"><h2 style="color:var(--text);margin:0 0 6px">Start by uploading a document</h2>Drop a PDF, TXT or MD file in the panel on the left.<div class="chips"><span class="chip" id="sample">Or load a sample document</span></div></div>`;
+  const s = $('sample'); if (s) s.onclick = loadSample;
+}
 
-async function ask() {
-  const question = $('q').value.trim(); if (question.length < 3) return;
-  $('ask').disabled = true; $('result').innerHTML = '<div class="card muted">Thinking...</div>';
-  const payload = { question }; if ($('mode').value) payload.mode = $('mode').value;
-  const r = await fetch('/api/ask', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-  const d = await r.json();
-  if (!r.ok) { $('result').innerHTML = `<div class="card">${esc(JSON.stringify(d.detail || d))}</div>`; $('ask').disabled = false; return; }
-  const f = d.faithfulness || {}; const bad = (f.sentences || []).filter(s => !s.supported);
+async function loadSample() {
+  const text = "JWT refresh tokens should be stored in an httpOnly, Secure, SameSite cookie, never in localStorage, because scripts can read localStorage. Access tokens should be short lived, around 15 minutes. Rotate refresh tokens on every use and revoke the whole family if a reused token is detected.\n\nHTTP caching uses the Cache-Control header. max-age sets how many seconds a response is fresh. ETag lets a client revalidate with If-None-Match and receive 304 Not Modified when nothing changed.";
+  await uploadFiles([new File([text], 'sample-notes.txt', { type: 'text/plain' })]);
+  $('q').value = 'Where should refresh tokens be stored?'; $('q').focus();
+}
+
+function uploadOne(file) {
+  return new Promise((resolve) => {
+    const row = document.createElement('div'); row.className = 'up';
+    row.innerHTML = `${esc(file.name)}<div class="bar"><i></i></div>`; $('uploads').prepend(row);
+    const xhr = new XMLHttpRequest(), fd = new FormData(); fd.append('file', file);
+    xhr.open('POST', '/api/upload');
+    xhr.upload.onprogress = (e) => { if (e.lengthComputable) row.querySelector('i').style.width = (e.loaded / e.total * 90) + '%'; };
+    xhr.onload = () => {
+      let d = {}; try { d = JSON.parse(xhr.responseText); } catch {}
+      row.querySelector('i').style.width = '100%';
+      if (xhr.status < 300) { row.classList.add('ok'); row.innerHTML = `✓ ${esc(file.name)} · ${d.chunks} chunks, ${d.pages} page(s)`; }
+      else { row.classList.add('err'); row.innerHTML = `✗ ${esc(file.name)}: ${esc(d.detail || 'upload failed')}`; }
+      setTimeout(() => row.remove(), 8000); resolve();
+    };
+    xhr.onerror = () => { row.classList.add('err'); row.textContent = `✗ ${file.name}: network error`; resolve(); };
+    xhr.send(fd);
+  });
+}
+async function uploadFiles(files) {
+  for (const f of files) await uploadOne(f);   // sequential: the index is rebuilt per upload
+  loadDocs();
+}
+
+const drop = $('drop');
+drop.onclick = () => $('file').click();
+drop.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') $('file').click(); };
+$('file').onchange = (e) => { uploadFiles([...e.target.files]); e.target.value = ''; };
+['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => uploadFiles([...e.dataTransfer.files]));
+
+function addMsg(html, cls) {
+  const t = $('thread'); const first = !t.querySelector('.msg'); if (first) t.innerHTML = '';
+  const d = document.createElement('div'); d.className = 'msg ' + cls; d.innerHTML = html; t.appendChild(d);
+  t.scrollTop = t.scrollHeight; return d;
+}
+
+function renderAnswer(d, id) {
+  const f = d.faithfulness || {}, bad = (f.sentences || []).filter(s => !s.supported);
   const fbadge = (f.sentences || []).length
     ? `<span class="badge ${bad.length ? 'warn' : 'ok'}" title="Cheap lexical heuristic, not an LLM judge">${bad.length ? '⚠ ' + bad.length + ' unsupported' : '✓ supported'} · ${Math.round(f.score * 100)}%</span>` : '';
-  const warn = bad.length ? `<div class="muted" style="margin-top:10px">Sentences with weak word overlap with their cited sources (heuristic, may be false alarms):</div>` +
-    bad.map(s => `<div class="unsup">${esc(s.text)} <span class="muted">· support ${Math.round(s.support * 100)}%</span></div>`).join('') : '';
-  $('result').innerHTML = `<div class="card"><div class="row" style="justify-content:space-between"><b>Answer</b><span class="row" style="gap:6px">${fbadge}<span class="badge">${d.mode}</span></span></div>
-    <div class="answer" style="margin-top:8px">${esc(d.answer)}</div>${warn}</div>` +
-    (d.sources.length ? `<div class="card"><b>Sources</b>` + d.sources.map(s =>
-      `<div class="src"><b>[${s.n}]</b> ${esc(s.doc)} · p.${s.page} <span class="muted">· score ${s.score}</span><div class="muted" style="margin-top:4px">${esc(s.text.slice(0, 320))}${s.text.length > 320 ? '…' : ''}</div></div>`).join('') + `</div>` : '');
-  $('ask').disabled = false;
+  const text = esc(d.answer).replace(/\[(\d+)\]/g, (m, n) => `<span class="cite" data-t="${id}" data-n="${n}">[${n}]</span>`);
+  const warn = bad.length ? `<div class="muted" style="margin-top:10px">Weak word overlap with cited sources (heuristic, may be a false alarm):</div>` +
+    bad.map(s => `<div class="unsup">${esc(s.text)} <span class="muted">· ${Math.round(s.support * 100)}%</span></div>`).join('') : '';
+  const src = d.sources.length ? `<details ${bad.length ? 'open' : ''}><summary>${d.sources.length} source passage(s)</summary>` + d.sources.map(s =>
+    `<div class="src" id="s-${id}-${s.n}"><b>[${s.n}]</b> ${esc(s.doc)} · p.${s.page} <span class="muted">· score ${s.score}</span><div class="muted" style="margin-top:4px">${esc(s.text.slice(0, 360))}${s.text.length > 360 ? '…' : ''}</div></div>`).join('') + `</details>` : '';
+  return `<div class="bubble"><div class="answer">${text}</div>${warn}<div class="meta">${fbadge}<span class="badge">${esc(d.mode)}</span></div>${src}</div>`;
 }
-$('ask').onclick = ask;
-$('q').addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
-loadDocs();
+
+document.addEventListener('click', (e) => {
+  const c = e.target.closest('.cite'); if (!c) return;
+  const el = $(`s-${c.dataset.t}-${c.dataset.n}`); if (!el) return;
+  el.closest('details').open = true; el.classList.add('hl'); el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => el.classList.remove('hl'), 1600);
+});
+
+$('form').onsubmit = async (e) => {
+  e.preventDefault();
+  const question = $('q').value.trim(); if (question.length < 3) return;
+  if (!docs.length) { addMsg('<div class="bubble">Upload a document first, then ask again.</div>', 'bot'); return; }
+  $('q').value = ''; $('ask').disabled = true; const id = ++turn;
+  addMsg(`<div class="bubble">${esc(question)}</div>`, 'user');
+  const pending = addMsg('<div class="bubble muted">Searching your documents<span class="dots"></span></div>', 'bot');
+  const payload = { question, k: +$('k').value }; if ($('mode').value) payload.mode = $('mode').value;
+  try {
+    const r = await fetch('/api/ask', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    const d = await r.json();
+    pending.innerHTML = r.ok ? renderAnswer(d, id) : `<div class="bubble">${esc(typeof d.detail === 'string' ? d.detail : JSON.stringify(d.detail || d))}</div>`;
+  } catch { pending.innerHTML = '<div class="bubble">Network error. Is the server running?</div>'; }
+  $('ask').disabled = false; $('q').focus(); $('thread').scrollTop = $('thread').scrollHeight;
+};
+$('clear').onclick = () => { $('thread').innerHTML = ''; renderEmpty(); };
+
+loadHealth(); loadDocs();
 </script>
 </body>
 </html>

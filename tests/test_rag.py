@@ -73,3 +73,13 @@ def test_api_flow(tmp_path, monkeypatch):
     assert c.post("/api/ask", json={"question": "hi"}).status_code == 422
     assert c.delete("/api/docs/notes.txt").status_code == 200
     assert c.delete("/api/docs/notes.txt").status_code == 404
+
+
+def test_health_endpoint(monkeypatch, tmp_path):
+    monkeypatch.setenv("INDEX_PATH", str(tmp_path / "i.json"))
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    from app import main
+    r = TestClient(main.app).get("/api/health")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["status"] == "ok" and body["llm"] is False
