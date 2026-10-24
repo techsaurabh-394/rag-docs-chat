@@ -2,5 +2,5 @@ fastapi>=0.110
 uvicorn[standard]>=0.29
 python-multipart>=0.0.9
 pypdf>=4.0
-numpy>=1.26
+numpy>=2.5.4
 anthropic>=0.40        # optional: only used when ANTHROPIC_API_KEY is set
