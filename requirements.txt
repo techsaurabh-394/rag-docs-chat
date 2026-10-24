@@ -3,4 +3,4 @@ uvicorn[standard]>=0.29
 python-multipart>=0.0.9
 pypdf>=4.0
 numpy>=1.26
-anthropic>=0.40        # optional: only used when ANTHROPIC_API_KEY is set
+anthropic>=1.17.0        # optional: only used when ANTHROPIC_API_KEY is set
