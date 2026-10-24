@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Star this repository">
+<style>
+@keyframes twinkle{0%,100%{transform:scale(1) rotate(0deg);opacity:1}50%{transform:scale(1.18) rotate(8deg);opacity:.85}}
+.s{transform-box:fill-box;transform-origin:center;animation:twinkle 2.2s ease-in-out infinite}
+@keyframes spark{0%,100%{opacity:0}50%{opacity:1}}
+.p1{animation:spark 2.2s ease-in-out infinite}.p2{animation:spark 2.2s .7s ease-in-out infinite}.p3{animation:spark 2.2s 1.4s ease-in-out infinite}
+</style>
+<path class="s" d="M32 6l7.6 15.4 17 2.5-12.3 12 2.9 16.9L32 44.8 16.8 52.8l2.9-16.9-12.3-12 17-2.5z" fill="#ffd33d" stroke="#e3a900" stroke-width="2" stroke-linejoin="round"/>
+<circle class="p1" cx="9" cy="14" r="2.2" fill="#ffd33d"/><circle class="p2" cx="55" cy="12" r="2" fill="#7ee2b8"/><circle class="p3" cx="53" cy="52" r="2.2" fill="#6ea8fe"/>
+</svg>

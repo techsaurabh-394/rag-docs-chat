@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="330" viewBox="0 0 1000 330" role="img" aria-label="Pipeline: documents are chunked and indexed; a question runs vector search and BM25 in parallel, results are fused with RRF, an answer is written from the top chunks, and a faithfulness check scores it.">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b1020"/><stop offset="1" stop-color="#1b1646"/></linearGradient>
+<marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#8b93a7"/></marker></defs>
+<style>text{font-family:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif}.t{font-size:15px;font-weight:700;fill:#fff}.u{font-size:11.5px;fill:#aab2c8}
+@keyframes dash{to{stroke-dashoffset:-24}}.ln{stroke:#6ea8fe;stroke-width:2.5;stroke-dasharray:6 6;animation:dash 1s linear infinite;fill:none}
+@keyframes glow{0%,100%{opacity:.55}16%{opacity:1}}
+.n1{animation:glow 6s infinite}.n2{animation:glow 6s 1s infinite}.n3{animation:glow 6s 2s infinite}.n4{animation:glow 6s 3s infinite}.n5{animation:glow 6s 4s infinite}.n6{animation:glow 6s 5s infinite}
+@keyframes travel{0%{transform:translateX(0);opacity:0}5%{opacity:1}95%{opacity:1}100%{transform:translateX(900px);opacity:0}}
+.pk{animation:travel 6s linear infinite}</style>
+<rect width="1000" height="330" rx="18" fill="url(#bg)"/>
+<text x="500" y="38" text-anchor="middle" font-size="20" font-weight="800" fill="#fff">Retrieve first. Answer only from what you found.</text>
+<g fill="#1b2150" stroke="#4a549a" stroke-width="1.5">
+<rect class="n1" x="30" y="80" width="130" height="80" rx="14"/>
+<rect class="n2" x="188" y="80" width="130" height="80" rx="14"/>
+<rect class="n3" x="346" y="80" width="130" height="80" rx="14" stroke="#6ea8fe"/>
+<rect class="n4" x="504" y="80" width="130" height="80" rx="14" stroke="#7ee2b8"/>
+<rect class="n5" x="662" y="80" width="130" height="80" rx="14"/>
+<rect class="n6" x="820" y="80" width="150" height="80" rx="14" stroke="#7ee2b8"/></g>
+<g text-anchor="middle">
+<text class="t" x="95" y="114">1 · Upload</text><text class="u" x="95" y="136">PDF, TXT, MD</text>
+<text class="t" x="253" y="114">2 · Chunk</text><text class="u" x="253" y="136">800 chars, 150 overlap</text>
+<text class="t" x="411" y="114">3 · Index</text><text class="u" x="411" y="136">vectors + BM25</text>
+<text class="t" x="569" y="114">4 · Fuse</text><text class="u" x="569" y="136">RRF (k=60)</text>
+<text class="t" x="727" y="114">5 · Answer</text><text class="u" x="727" y="136">top-k chunks, cited</text>
+<text class="t" x="895" y="114">6 · Check</text><text class="u" x="895" y="136">faithfulness score</text></g>
+<g marker-end="url(#ar)"><path class="ln" d="M162 120H186"/><path class="ln" d="M320 120H344"/><path class="ln" d="M478 120H502"/><path class="ln" d="M636 120H660"/><path class="ln" d="M794 120H818"/></g>
+<circle class="pk" cx="50" cy="120" r="5" fill="#7ee2b8"/>
+<g fill="none" stroke="#4a549a" stroke-width="1.5" stroke-dasharray="4 4"><path d="M411 162V196H569V164"/></g>
+<text x="490" y="190" text-anchor="middle" class="u">question runs vector search and keyword search in parallel</text>
+<g font-size="13" text-anchor="middle">
+<rect x="150" y="226" width="300" height="64" rx="12" fill="#151a36" stroke="#3a4380"/>
+<text x="300" y="252" fill="#e6e8ee" font-weight="700">With ANTHROPIC_API_KEY</text><text x="300" y="274" class="u">Claude writes the answer and cites sources</text>
+<rect x="550" y="226" width="300" height="64" rx="12" fill="#151a36" stroke="#3a4380"/>
+<text x="700" y="252" fill="#e6e8ee" font-weight="700">Without a key</text><text x="700" y="274" class="u">extractive: best passage with its citation</text></g>
+</svg>

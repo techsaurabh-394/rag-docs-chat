@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="900" height="524" viewBox="0 0 900 524" role="img" aria-label="Animated terminal: start rag-docs-chat, upload a document, ask a question and get a cited answer with a faithfulness score, compare retrieval modes, and run the tests.">
+<style>
+text{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;white-space:pre}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}.cur{animation:blink 1s steps(1) infinite}
+@keyframes l0{0%,3.00%{opacity:0}3.80%,93%{opacity:1}100%{opacity:0}}.l0{animation:l0 22.0s linear infinite}
+@keyframes l1{0%,7.71%{opacity:0}8.51%,93%{opacity:1}100%{opacity:0}}.l1{animation:l1 22.0s linear infinite}
+@keyframes l2{0%,12.41%{opacity:0}13.21%,93%{opacity:1}100%{opacity:0}}.l2{animation:l2 22.0s linear infinite}
+@keyframes l3{0%,17.12%{opacity:0}17.92%,93%{opacity:1}100%{opacity:0}}.l3{animation:l3 22.0s linear infinite}
+@keyframes l4{0%,21.82%{opacity:0}22.62%,93%{opacity:1}100%{opacity:0}}.l4{animation:l4 22.0s linear infinite}
+@keyframes l5{0%,26.53%{opacity:0}27.33%,93%{opacity:1}100%{opacity:0}}.l5{animation:l5 22.0s linear infinite}
+@keyframes l6{0%,31.24%{opacity:0}32.04%,93%{opacity:1}100%{opacity:0}}.l6{animation:l6 22.0s linear infinite}
+@keyframes l7{0%,35.94%{opacity:0}36.74%,93%{opacity:1}100%{opacity:0}}.l7{animation:l7 22.0s linear infinite}
+@keyframes l8{0%,40.65%{opacity:0}41.45%,93%{opacity:1}100%{opacity:0}}.l8{animation:l8 22.0s linear infinite}
+@keyframes l9{0%,45.35%{opacity:0}46.15%,93%{opacity:1}100%{opacity:0}}.l9{animation:l9 22.0s linear infinite}
+@keyframes l10{0%,50.06%{opacity:0}50.86%,93%{opacity:1}100%{opacity:0}}.l10{animation:l10 22.0s linear infinite}
+@keyframes l11{0%,54.76%{opacity:0}55.56%,93%{opacity:1}100%{opacity:0}}.l11{animation:l11 22.0s linear infinite}
+@keyframes l12{0%,59.47%{opacity:0}60.27%,93%{opacity:1}100%{opacity:0}}.l12{animation:l12 22.0s linear infinite}
+@keyframes l13{0%,64.18%{opacity:0}64.98%,93%{opacity:1}100%{opacity:0}}.l13{animation:l13 22.0s linear infinite}
+@keyframes l14{0%,68.88%{opacity:0}69.68%,93%{opacity:1}100%{opacity:0}}.l14{animation:l14 22.0s linear infinite}
+@keyframes l15{0%,73.59%{opacity:0}74.39%,93%{opacity:1}100%{opacity:0}}.l15{animation:l15 22.0s linear infinite}
+@keyframes l16{0%,78.29%{opacity:0}79.09%,93%{opacity:1}100%{opacity:0}}.l16{animation:l16 22.0s linear infinite}
+</style>
+<rect width="900" height="524" rx="14" fill="#0b1020"/>
+<rect width="900" height="38" rx="14" fill="#151a36"/><rect y="24" width="900" height="14" fill="#151a36"/>
+<circle cx="24" cy="19" r="6" fill="#ff5f56"/><circle cx="46" cy="19" r="6" fill="#ffbd2e"/><circle cx="68" cy="19" r="6" fill="#27c93f"/>
+<text x="450" y="24" text-anchor="middle" fill="#8b93a7" style="font-size:13px">rag-docs-chat</text>
+<text class="l0" x="28" y="74" fill="#8b93a7"># Start the app (no API key needed)</text>
+<text class="l1" x="28" y="100" fill="#e6e8ee">$ uvicorn app.main:app</text>
+<text class="l2" x="28" y="126" fill="#8b93a7">INFO  Uvicorn running on http://127.0.0.1:8000</text>
+<text class="l3" x="28" y="152" fill="#8b93a7"># Upload a document, then ask</text>
+<text class="l4" x="28" y="178" fill="#e6e8ee">$ curl -F file=@jwt_auth.txt localhost:8000/api/upload</text>
+<text class="l5" x="28" y="204" fill="#7ee2b8">{&quot;name&quot;:&quot;jwt_auth.txt&quot;,&quot;pages&quot;:1,&quot;chunks&quot;:2}</text>
+<text class="l6" x="28" y="230" fill="#e6e8ee">$ curl -X POST localhost:8000/api/ask -d '{&quot;question&quot;:&quot;Where should refresh tokens be stored?&quot;}'</text>
+<text class="l7" x="28" y="256" fill="#c8cede">answer   Refresh tokens should be stored in an httpOnly cookie ...</text>
+<text class="l8" x="28" y="282" fill="#6ea8fe">source   [1] jwt_auth.txt, page 1</text>
+<text class="l9" x="28" y="308" fill="#7ee2b8">faithfulness  1.0   unsupported sentences: 0</text>
+<text class="l10" x="28" y="334" fill="#8b93a7"># Compare retrieval modes on the bundled questions</text>
+<text class="l11" x="28" y="360" fill="#e6e8ee">$ python -m eval.run_eval --mode all</text>
+<text class="l12" x="28" y="386" fill="#c8cede">local   hit@1 0.67  hit@3 0.89  MRR 0.769</text>
+<text class="l13" x="28" y="412" fill="#c8cede">bm25    hit@1 0.72  hit@3 0.89  MRR 0.819</text>
+<text class="l14" x="28" y="438" fill="#7ee2b8">hybrid  hit@1 0.72  hit@3 0.89  MRR 0.819</text>
+<text class="l15" x="28" y="464" fill="#e6e8ee">$ pytest -q</text>
+<text class="l16" x="28" y="490" fill="#7ee2b8">31 passed</text>
+<rect class="cur" x="28" y="504" width="9" height="16" fill="#7ee2b8"/>
+</svg>

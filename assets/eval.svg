@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="330" viewBox="0 0 900 330" role="img" aria-label="Retrieval evaluation on the bundled set of 18 questions: hit at 1, hit at 3 and MRR for local, bm25 and hybrid modes. Local 0.67, 0.89, 0.769. BM25 and hybrid 0.72, 0.89, 0.819.">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b1020"/><stop offset="1" stop-color="#1b1646"/></linearGradient></defs>
+<style>text{font-family:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif}.l{font-size:13px;fill:#aab2c8}.v{font-size:12px;font-weight:700;fill:#fff}
+.bar{transform-box:fill-box;transform-origin:bottom;animation:grow 1.1s ease-out both}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.g2{animation-delay:.25s}.g3{animation-delay:.5s}</style>
+<rect width="900" height="330" rx="18" fill="url(#bg)"/>
+<text x="450" y="34" text-anchor="middle" font-size="19" font-weight="800" fill="#fff">Measured retrieval quality (18 questions, 3 documents, k=5)</text>
+<g stroke="rgba(255,255,255,.08)"><path d="M70 60H860M70 110H860M70 160H860M70 210H860M70 260H860"/></g>
+<g class="l" text-anchor="end"><text x="62" y="264">0</text><text x="62" y="214">0.25</text><text x="62" y="164">0.5</text><text x="62" y="114">0.75</text><text x="62" y="64">1.0</text></g>
+<!-- scale: 200px = 1.0, baseline y=260 -->
+<!-- hit@1 group -->
+<rect class="bar" x="110" y="126" width="46" height="134" rx="6" fill="#8b93a7"/><rect class="bar" x="162" y="116" width="46" height="144" rx="6" fill="#6ea8fe"/><rect class="bar" x="214" y="116" width="46" height="144" rx="6" fill="#7ee2b8"/>
+<g class="v" text-anchor="middle"><text x="133" y="120">0.67</text><text x="185" y="110">0.72</text><text x="237" y="110">0.72</text></g>
+<!-- hit@3 group -->
+<rect class="bar g2" x="370" y="82" width="46" height="178" rx="6" fill="#8b93a7"/><rect class="bar g2" x="422" y="82" width="46" height="178" rx="6" fill="#6ea8fe"/><rect class="bar g2" x="474" y="82" width="46" height="178" rx="6" fill="#7ee2b8"/>
+<g class="v" text-anchor="middle"><text x="393" y="76">0.89</text><text x="445" y="76">0.89</text><text x="497" y="76">0.89</text></g>
+<!-- MRR group -->
+<rect class="bar g3" x="630" y="106" width="46" height="154" rx="6" fill="#8b93a7"/><rect class="bar g3" x="682" y="96" width="46" height="164" rx="6" fill="#6ea8fe"/><rect class="bar g3" x="734" y="96" width="46" height="164" rx="6" fill="#7ee2b8"/>
+<g class="v" text-anchor="middle"><text x="653" y="100">0.769</text><text x="705" y="90">0.819</text><text x="757" y="90">0.819</text></g>
+<g class="l" text-anchor="middle" font-weight="700"><text x="185" y="284">hit@1</text><text x="445" y="284">hit@3</text><text x="705" y="284">MRR</text></g>
+<g font-size="13"><rect x="300" y="302" width="12" height="12" rx="3" fill="#8b93a7"/><text class="l" x="318" y="313">local</text>
+<rect x="400" y="302" width="12" height="12" rx="3" fill="#6ea8fe"/><text class="l" x="418" y="313">bm25</text>
+<rect x="500" y="302" width="12" height="12" rx="3" fill="#7ee2b8"/><text class="l" x="518" y="313">hybrid (default)</text></g>
+</svg>

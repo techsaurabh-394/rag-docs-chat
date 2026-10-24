@@ -1,10 +1,30 @@
-# rag-docs-chat
+<p align="center">
+  <img src="assets/banner.svg" alt="rag-docs-chat: ask your documents and get answers that cite the exact source passage" width="100%"/>
+</p>
 
-[![Stars](https://img.shields.io/github/stars/techsaurabh-394/rag-docs-chat?style=flat&logo=github&color=6ea8fe)](https://github.com/techsaurabh-394/rag-docs-chat/stargazers) [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat)](LICENSE) [![Last commit](https://img.shields.io/github/last-commit/techsaurabh-394/rag-docs-chat?style=flat)](https://github.com/techsaurabh-394/rag-docs-chat/commits/main) [![Issues](https://img.shields.io/github/issues/techsaurabh-394/rag-docs-chat?style=flat)](https://github.com/techsaurabh-394/rag-docs-chat/issues) [![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=flat&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/saurabhdev)
+<p align="center">
+  <a href="https://github.com/techsaurabh-394/rag-docs-chat/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/techsaurabh-394/rag-docs-chat/ci.yml?style=for-the-badge&label=CI" alt="CI"/></a>
+  <img src="https://img.shields.io/badge/tests-31%20passing-brightgreen?style=for-the-badge" alt="31 tests passing"/>
+  <img src="https://img.shields.io/badge/Python-3.10%E2%80%933.12-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.10 to 3.12"/>
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT"/></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/techsaurabh-394/rag-docs-chat"><img src="assets/star.svg" width="28" alt=""/></a>
+  <b><a href="https://github.com/techsaurabh-394/rag-docs-chat">Star this repo</a></b> if it helps you build a RAG app &nbsp;·&nbsp;
+  <a href="https://buymeacoffee.com/saurabhdev"><img src="https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=flat&logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"/></a>
+</p>
+
+# rag-docs-chat
 
 Upload PDFs or text files, ask questions, and get answers that **cite the exact source passage** (document, page and snippet). Retrieval is **hybrid** (BM25 plus vectors), and every answer gets a **faithfulness check** that flags sentences the cited passages do not support.
 
 It is a small, readable RAG app: about 500 lines of Python, no vector database, and no API key needed to try it.
+
+<p align="center">
+  <img src="assets/demo.svg" alt="Animated terminal: start the app, upload a document, ask a question and get a cited answer with a faithfulness score, compare retrieval modes, run the tests" width="780"/>
+</p>
 
 > New to RAG? Read [what RAG is](#what-is-rag) below, or follow the full step-by-step course: [ai-engineer-roadmap, Phase 1 · RAG Foundations](https://github.com/techsaurabh-394/ai-engineer-roadmap/tree/main/01-rag-foundations).
 
@@ -12,6 +32,10 @@ It is a small, readable RAG app: about 500 lines of Python, no vector database, 
 A language model only knows what it was trained on. It has not seen your PDFs. **RAG (Retrieval-Augmented Generation)** fixes that in two steps: first *retrieve* the few passages most relevant to the question, then *generate* an answer from only those passages, with citations. That makes answers checkable and cuts down on made-up facts.
 
 ## How it works
+
+<p align="center">
+  <img src="assets/flow.svg" alt="Pipeline: upload, chunk, index, fuse with RRF, answer with citations, faithfulness check" width="100%"/>
+</p>
 
 ```mermaid
 flowchart LR
@@ -117,6 +141,10 @@ python -m eval.run_eval --dense             # use sentence-transformers
 ```
 A chunk counts as a hit when it comes from the expected document and contains the expected phrase.
 
+<p align="center">
+  <img src="assets/eval.svg" alt="Bar chart of hit@1, hit@3 and MRR for local, bm25 and hybrid retrieval" width="780"/>
+</p>
+
 **Measured results** (bundled set: 18 questions, 3 documents, 6 chunks, local embedder, k=5):
 
 | mode | hit@1 | hit@3 | MRR |
@@ -135,7 +163,7 @@ This is a **cheap lexical heuristic, not an LLM judge**. It catches sentences ab
 ## Tests
 ```bash
 pip install -r requirements-dev.txt
-pytest -q          # 30 tests: chunking, BM25, RRF, all modes, faithfulness, API with no key
+pytest -q          # 31 tests: chunking, BM25, RRF, all modes, faithfulness, API with no key
 ```
 CI runs the tests and the evaluation on every push.
 
@@ -152,6 +180,26 @@ CI runs the tests and the evaluation on every push.
 - The index is rebuilt on every upload. That is fine for tens of documents. For larger collections, use a vector database (pgvector, Qdrant) and incremental indexing.
 - Ideas: a reranker, streaming answers, an LLM-based faithfulness judge. See [Advanced RAG](https://github.com/techsaurabh-394/ai-engineer-roadmap/tree/main/02-advanced-rag) for how each works.
 
+## GitHub Actions in this repo
+```mermaid
+flowchart LR
+    A[Push or pull request] --> B[CI]
+    B --> B1[Tests on Python 3.10, 3.11, 3.12]
+    B --> B2[Retrieval evaluation, all modes]
+    B --> B3[Docker image builds]
+    B --> B4[README diagrams are valid SVG]
+    B1 --> C[Deploy, main only]
+    C --> C1[Publish image to GHCR]
+    C1 --> C2[Render deploy and health check, if configured]
+```
+| Workflow | Runs when | Does |
+|---|---|---|
+| `ci.yml` | every push to `main` and every pull request | Tests on Python 3.10 to 3.12, evaluation, Docker build check, SVG validation |
+| `deploy.yml` | CI passes on `main`, or run it by hand | Builds and publishes the image to GHCR, then triggers Render if `RENDER_DEPLOY_HOOK` is set |
+| `dependabot.yml` | monthly | Update PRs for pip packages, Actions and the Docker base image |
+
+All third-party Actions are pinned to full commit SHAs, and workflows use read-only permissions unless a job needs more (the image publish job writes packages). No secrets are needed for CI.
+
 ## Roadmap (contributions welcome)
 - [x] Hybrid retrieval (BM25 + dense)
 - [x] Answer-faithfulness check
@@ -160,11 +208,14 @@ CI runs the tests and the evaluation on every push.
 - [ ] pgvector / Qdrant backend
 - [ ] OCR fallback for scanned PDFs
 
+## Star history
+[![Star History Chart](https://api.star-history.com/svg?repos=techsaurabh-394/rag-docs-chat&type=Date)](https://star-history.com/#techsaurabh-394/rag-docs-chat&Date)
+
 ## License
 MIT, built by Saurabh Pathak.
 
 ## Support this project
-If this is useful, a star helps others find it, and you can support more free open-source work:
+If this is useful, please <a href="https://github.com/techsaurabh-394/rag-docs-chat"><img src="assets/star.svg" width="16" alt=""/> star the repo</a>, share it, or support more free open-source work:
 
 <a href="https://buymeacoffee.com/saurabhdev"><img src="https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"/></a>
 
