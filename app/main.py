@@ -6,10 +6,11 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 from pypdf import PdfReader
 
+from . import providers
 from .rag import MODES, Index, answer
 
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024
@@ -53,7 +54,9 @@ def health():
     """Used by the UI status badges and by deploy health checks."""
     return {
         "status": "ok",
-        "llm": bool(os.getenv("ANTHROPIC_API_KEY")),
+        "llm": bool(os.getenv("ANTHROPIC_API_KEY")) or providers.gemini_enabled(),
+        "llm_provider": "claude" if os.getenv("ANTHROPIC_API_KEY") else ("gemini" if providers.gemini_enabled() else None),
+        "voice": providers.speech_enabled(),
         "retrieval": os.getenv("RETRIEVAL", "hybrid"),
         "embedder": os.getenv("EMBEDDER", "local"),
         "documents": len(index.documents()),
@@ -78,6 +81,22 @@ def delete_doc(name: str):
     if not index.remove_document(name):
         raise HTTPException(404, "Document not found.")
     return {"deleted": name}
+
+
+class Speak(BaseModel):
+    text: str = Field(min_length=1, max_length=4000)
+
+
+@app.post("/api/speak")
+def speak(body: Speak):
+    """Read an answer aloud with ElevenLabs. 503 when no key is configured."""
+    if not providers.speech_enabled():
+        raise HTTPException(503, "Voice is not configured (set ELEVENLABS_API_KEY).")
+    try:
+        audio = providers.speak(body.text)
+    except providers.ProviderError as e:
+        raise HTTPException(502, f"Voice provider error: {e}")
+    return Response(content=audio, media_type="audio/mpeg")
 
 
 @app.post("/api/ask")

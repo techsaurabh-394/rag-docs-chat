@@ -103,7 +103,8 @@ let docs = [], health = {}, turn = 0;
 async function loadHealth() {
   try { health = await (await fetch('/api/health')).json(); } catch { health = {}; }
   $('status').innerHTML =
-    `<span class="badge ${health.llm ? 'ok' : 'warn'}" title="${health.llm ? 'Claude writes the answer' : 'No API key: returns the best passage'}">${health.llm ? 'Claude answers' : 'extractive mode'}</span>` +
+    `<span class="badge ${health.llm ? 'ok' : 'warn'}" title="${health.llm ? 'A hosted model writes the answer' : 'No API key: returns the best passage'}">${health.llm ? (health.llm_provider === 'gemini' ? 'Gemini answers' : 'Claude answers') : 'extractive mode'}</span>` +
+    (health.voice ? `<span class="badge ok" title="ElevenLabs reads answers aloud">voice on</span>` : '') +
     `<span class="badge">${esc(health.retrieval || 'hybrid')}</span><span class="badge">${esc(health.embedder || 'local')} embeddings</span>`;
 }
 
@@ -178,8 +179,21 @@ function renderAnswer(d, id) {
     bad.map(s => `<div class="unsup">${esc(s.text)} <span class="muted">· ${Math.round(s.support * 100)}%</span></div>`).join('') : '';
   const src = d.sources.length ? `<details ${bad.length ? 'open' : ''}><summary>${d.sources.length} source passage(s)</summary>` + d.sources.map(s =>
     `<div class="src" id="s-${id}-${s.n}"><b>[${s.n}]</b> ${esc(s.doc)} · p.${s.page} <span class="muted">· score ${s.score}</span><div class="muted" style="margin-top:4px">${esc(s.text.slice(0, 360))}${s.text.length > 360 ? '…' : ''}</div></div>`).join('') + `</details>` : '';
-  return `<div class="bubble"><div class="answer">${text}</div>${warn}<div class="meta">${fbadge}<span class="badge">${esc(d.mode)}</span></div>${src}</div>`;
+  const listen = health.voice ? `<button class="ghost listen" type="button" data-t="${id}">🔊 Listen</button>` : '';
+  return `<div class="bubble"><div class="answer" id="a-${id}">${text}</div>${warn}<div class="meta">${fbadge}<span class="badge">${esc(d.mode)}</span>${listen}</div>${src}</div>`;
 }
+
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('.listen'); if (!b) return;
+  const el = $('a-' + b.dataset.t); if (!el) return;
+  const old = b.textContent; b.disabled = true; b.textContent = '…';
+  try {
+    const r = await fetch('/api/speak', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ text: el.textContent.replace(/\[\d+\]/g, '') }) });
+    if (!r.ok) throw new Error(r.status);
+    new Audio(URL.createObjectURL(await r.blob())).play();
+  } catch { b.textContent = 'Voice unavailable'; setTimeout(() => { b.textContent = old; b.disabled = false; }, 2000); return; }
+  b.textContent = old; b.disabled = false;
+});
 
 document.addEventListener('click', (e) => {
   const c = e.target.closest('.cite'); if (!c) return;

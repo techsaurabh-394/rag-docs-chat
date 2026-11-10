@@ -46,9 +46,13 @@ flowchart LR
 | `bm25` | Keyword search only | Exact terms, error codes, names |
 | `hybrid` (default) | BM25 + vectors fused with RRF | Both; safest default |
 
-### Two answer modes
+### Answer modes
 - **With `ANTHROPIC_API_KEY`:** Claude writes the answer from the retrieved passages and cites sources. If the passages do not contain the answer, it says so.
+- **With `GEMINI_API_KEY`** (and no Anthropic key): Google Gemini writes the answer the same way (`GEMINI_MODEL`, default `gemini-2.5-flash`). If the call fails, the app falls back to extractive mode and says so.
 - **Without a key:** extractive mode returns the best passage with its citation. The whole app runs with no key and no model downloads.
+
+### Voice answers (optional)
+Set `ELEVENLABS_API_KEY` and each answer gets a **Listen** button. It calls `POST /api/speak`, which uses ElevenLabs text-to-speech (`ELEVENLABS_VOICE_ID`, `ELEVENLABS_MODEL` are overridable) and returns MP3. Citation markers like `[1]` are stripped before speaking. Without a key the endpoint returns 503 and the button is hidden. Both providers use plain HTTPS, so there are no extra dependencies.
 
 ## Run it
 ```bash

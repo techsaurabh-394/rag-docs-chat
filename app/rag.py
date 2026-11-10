@@ -12,6 +12,7 @@ from .chunking import Chunk, chunk_pages
 from .bm25 import BM25, rrf
 from .embeddings import Embedder, get_embedder
 from .faithfulness import check_faithfulness
+from . import providers
 
 MODES = ("local", "bm25", "hybrid")
 RRF_K = 60
@@ -135,6 +136,16 @@ def answer(question: str, hits: list[tuple[float, Chunk]]) -> dict:
         }
 
     chunk_texts = [c.text for _, c in hits]
+
+    if providers.gemini_enabled() and not os.getenv("ANTHROPIC_API_KEY"):
+        try:
+            text = providers.gemini_answer(
+                SYSTEM_PROMPT, f"Sources:\n\n{build_context(hits)}\n\nQuestion: {question}"
+            )
+            return {"answer": text, "mode": "llm", "sources": sources, "faithfulness": check_faithfulness(text, chunk_texts)}
+        except providers.ProviderError as e:
+            note = f"(Gemini unavailable: {e}. Showing top passages instead.)\n\n"
+            return _extractive_result(note, hits, sources)
 
     if os.getenv("ANTHROPIC_API_KEY"):
         try:
